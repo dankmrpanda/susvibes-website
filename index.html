@@ -12,6 +12,8 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
@@ -19,6 +21,8 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
   <script src="./static/js/index.js"></script>
   <script src="./static/js/game.js"></script> <!-- Game Logic -->
 </head>
@@ -288,7 +292,6 @@
               <li><strong>Self-Selection</strong>: Asking the agent to identify potential risks.</li>
               <li><strong>Oracle CWE</strong>: Explicitly telling the agent the vulnerability type.</li>
             </ul>
-
             <p>
               Surprisingly, <strong>none of these strategies succeeded</strong>. In fact, providing security hints
               caused a significant drop in <em>functional</em> correctness (approx. 6%), as agents became
@@ -325,7 +328,7 @@
                       <figure class="carousel-figure">
                         <img src="static/images/figure 6.png" alt="Adaptive Verification Pipeline detail">
                         <figcaption>
-                          <strong>Figure 6.</strong> Verification pipeline where SUSVIBES’s feature mask and the task
+                          <strong>Figure 6.</strong> Verification pipeline where SUSVIBES's feature mask and the task
                           are generated, verified, and adaptively adjusted. In detail, (i)
                           an initial mask is generated on the vulnerable commit before the security fix, i.e., masking
                           out a feature from its vulnerable implementation;
@@ -375,7 +378,6 @@
                 <span class="carousel-dot" data-index="2"></span>
               </div>
             </div>
-
           </div>
 
           <h3 class="title is-4">4. Complementary Blind Spots</h3>
@@ -390,7 +392,7 @@
       </div>
 
 
-
+    </div>
   </section>
 
 
@@ -559,7 +561,6 @@
 
       // COLLAPSE if already open
       if (currentExploitIndex === index) {
-        // Ensure it has a height to transition from
         viewer.style("height", viewer.node().scrollHeight + "px");
 
         viewer.transition()
@@ -583,7 +584,7 @@
         viewer.style("display", "block").style("height", "0px").style("opacity", 0);
       }
 
-      // Update content immediately but keep it invisible if we're doing a cross-fade
+      // Update content
       desc.html(exploitData[index].description);
       img.attr("src", exploitData[index].image);
 
@@ -628,8 +629,6 @@
         .transition().duration(200).style("background-color", "#fff5f7")
         .transition().duration(200).style("background-color", "#fff");
 
-      // Measure target height (wait a tiny bit for render if needed, but flex/block should be instant)
-      // Since images are preloaded, scrollHeight should be correct
       const targetHeight = viewer.node().scrollHeight + "px";
 
       viewer.transition()
@@ -639,6 +638,34 @@
         .style("opacity", 1)
         .on("end", () => viewer.style("height", "auto"));
     }
+
+    /* ── Carousel / Sliding-Window logic ── */
+    (function initCarousel() {
+      const track = document.getElementById('mitigation-track');
+      const prevBtn = document.getElementById('mitigation-prev');
+      const nextBtn = document.getElementById('mitigation-next');
+      const dotsContainer = document.getElementById('mitigation-dots');
+      if (!track || !prevBtn || !nextBtn || !dotsContainer) return;
+
+      const slides = track.querySelectorAll('.carousel-slide');
+      const dots = dotsContainer.querySelectorAll('.carousel-dot');
+      let current = 0;
+
+      function goTo(idx) {
+        if (idx < 0 || idx >= slides.length) return;
+        current = idx;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      }
+
+      prevBtn.addEventListener('click', () => goTo(current - 1));
+      nextBtn.addEventListener('click', () => goTo(current + 1));
+      dots.forEach(dot => {
+        dot.addEventListener('click', () => goTo(Number(dot.dataset.index)));
+      });
+
+      goTo(0);
+    })();
   </script>
 
 
