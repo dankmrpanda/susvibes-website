@@ -878,3 +878,568 @@
     font-size: 0.8rem;
   }
 }
+
+/* ─── Section 4: Animated Bar Chart ─── */
+.blind-spot-bars {
+  max-width: 560px;
+  margin: 1.5rem auto;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bar-label {
+  width: 140px;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #363636;
+  text-align: right;
+}
+
+.bar-track {
+  flex: 1;
+  height: 36px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #fff;
+  width: 0%;
+  transition: width 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bar-fill.bar-gold {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.bar-fill.bar-silver {
+  background: linear-gradient(90deg, #6b7280, #4b5563);
+}
+
+.bar-fill.bar-bronze {
+  background: linear-gradient(90deg, #92400e, #78350f);
+}
+
+.bar-fill.bar-blue {
+  background: linear-gradient(90deg, var(--accent-color), #1d4ed8);
+}
+
+.bar-fill.bar-teal {
+  background: linear-gradient(90deg, #0d9488, #0f766e);
+}
+
+.bar-fill.bar-slate {
+  background: linear-gradient(90deg, #64748b, #475569);
+}
+
+.section-takeaway {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #555;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-left: 4px solid var(--primary-color);
+  background: #fef2f4;
+  border-radius: 0 6px 6px 0;
+  text-align: left;
+}
+
+.section-takeaway strong {
+  color: #363636;
+}
+
+/* ─── Section 5: Heatmap Grid ─── */
+.heatmap-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.heatmap-toggle button {
+  padding: 0.6rem 1.5rem;
+  border: 2px solid #dbdbdb;
+  border-radius: 6px;
+  background: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #555;
+}
+
+.heatmap-toggle button.active {
+  border-color: var(--accent-color);
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(50, 115, 220, 0.25);
+}
+
+.heatmap-toggle button:hover:not(.active) {
+  border-color: #aaa;
+  background: #f9f9f9;
+}
+
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto 1.5rem;
+}
+
+.heatmap-cell {
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.4s ease;
+  border: 1px solid #e5e5e5;
+}
+
+.heatmap-cell-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.heatmap-cell-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.heatmap-cell-sub {
+  font-size: 0.7rem;
+  margin-top: 0.3rem;
+  color: #777;
+}
+
+.heatmap-cell.secure-high {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+}
+
+.heatmap-cell.secure-high .heatmap-cell-value {
+  color: #059669;
+}
+
+.heatmap-cell.secure-mid {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.heatmap-cell.secure-mid .heatmap-cell-value {
+  color: #d97706;
+}
+
+.heatmap-cell.secure-low {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.heatmap-cell.secure-low .heatmap-cell-value {
+  color: #dc2626;
+}
+
+.heatmap-cell.secure-none {
+  background: #fef2f2;
+  border-color: #f87171;
+}
+
+.heatmap-cell.secure-none .heatmap-cell-value {
+  color: #b91c1c;
+}
+
+.heatmap-cell.secure-perfect {
+  background: #ecfdf5;
+  border-color: #34d399;
+}
+
+.heatmap-cell.secure-perfect .heatmap-cell-value {
+  color: #047857;
+}
+
+/* ─── Section 6: Comparison Bars ─── */
+.comparison-group {
+  max-width: 560px;
+  margin: 0 auto 1.5rem;
+}
+
+.comparison-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.comparison-label {
+  width: 100px;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #363636;
+}
+
+.comparison-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.comparison-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comparison-bar-tag {
+  width: 50px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.comparison-bar-tag.func-tag {
+  color: #059669;
+}
+
+.comparison-bar-tag.sec-tag {
+  color: #dc2626;
+}
+
+.comparison-bar-track {
+  flex: 1;
+  height: 22px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.comparison-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  align-items: center;
+  padding-right: 6px;
+  justify-content: flex-end;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.comparison-bar-fill.func-bar {
+  background: linear-gradient(90deg, #34d399, #059669);
+}
+
+.comparison-bar-fill.sec-bar {
+  background: linear-gradient(90deg, #fca5a5, #dc2626);
+}
+
+.comparison-bar-fill.sec-bar-flat {
+  background: linear-gradient(90deg, #d4d4d4, #a3a3a3);
+}
+
+.comparison-delta {
+  width: 60px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.comparison-delta.positive {
+  color: #059669;
+}
+
+.comparison-delta.flat {
+  color: #999;
+}
+
+.comparison-delta.tiny {
+  color: #d97706;
+}
+
+/* ─── Section 7: Stat Counters + Progress Rings ─── */
+.stat-counters {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin: 1.5rem auto;
+  max-width: 600px;
+}
+
+.stat-counter-card {
+  text-align: center;
+  padding: 1.25rem;
+  flex: 1;
+  min-width: 120px;
+}
+
+.stat-counter-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #363636;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-counter-label {
+  font-size: 0.8rem;
+  color: #777;
+  margin-top: 0.3rem;
+}
+
+.progress-rings {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  margin: 2rem auto;
+  max-width: 600px;
+}
+
+.progress-ring-card {
+  text-align: center;
+}
+
+.progress-ring-svg {
+  width: 120px;
+  height: 120px;
+  transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+  fill: none;
+  stroke: #eee;
+  stroke-width: 8;
+}
+
+.progress-ring-fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.progress-ring-fill.ring-green {
+  stroke: #059669;
+}
+
+.progress-ring-fill.ring-red {
+  stroke: #dc2626;
+}
+
+.progress-ring-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  fill: #363636;
+}
+
+.progress-ring-label {
+  font-size: 0.8rem;
+  color: #777;
+  margin-top: 0.5rem;
+}
+
+/* ─── Section 8: Step Counter ─── */
+.step-counter-demo {
+  max-width: 480px;
+  margin: 1.5rem auto;
+}
+
+.step-counter-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  border: 2px solid #e5e5e5;
+  transition: border-color 0.3s ease;
+}
+
+.step-counter-row.success-row {
+  border-color: #6ee7b7;
+  background: #f0fdf9;
+}
+
+.step-counter-row.fail-row {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.step-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.step-details {
+  flex: 1;
+}
+
+.step-details-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #363636;
+  margin-bottom: 0.3rem;
+}
+
+.step-details-bar {
+  height: 20px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.step-details-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 0%;
+  transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.step-details-fill.fill-green {
+  background: linear-gradient(90deg, #6ee7b7, #059669);
+}
+
+.step-details-fill.fill-red {
+  background: linear-gradient(90deg, #fca5a5, #ef4444);
+}
+
+.step-details-sub {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: #777;
+}
+
+.step-result {
+  font-size: 1.1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.step-result.result-pass {
+  color: #059669;
+}
+
+.step-result.result-fail {
+  color: #dc2626;
+}
+
+/* ─── Section 9: Conclusion Callout ─── */
+.conclusion-callout {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  border: 2px solid #e5e5e5;
+  max-width: 600px;
+  margin: 1rem auto;
+}
+
+.conclusion-big-stat {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--primary-color);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.conclusion-subtitle {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.conclusion-final {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #363636;
+  padding-top: 1.25rem;
+  border-top: 2px solid #e5e5e5;
+}
+
+@media screen and (max-width: 768px) {
+  .bar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+
+  .bar-label {
+    text-align: left;
+    width: auto;
+  }
+
+  .heatmap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .comparison-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .comparison-label {
+    width: auto;
+  }
+
+  .stat-counters {
+    gap: 1rem;
+  }
+
+  .stat-counter-number {
+    font-size: 2rem;
+  }
+
+  .progress-rings {
+    gap: 1.5rem;
+  }
+
+  .progress-ring-svg {
+    width: 100px;
+    height: 100px;
+  }
+
+  .step-counter-row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .conclusion-big-stat {
+    font-size: 3.5rem;
+  }
+}

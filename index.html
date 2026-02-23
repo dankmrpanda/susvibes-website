@@ -39,13 +39,18 @@
           <div class="column has-text-centered">
             <h1 class="title is-1 publication-title">Is Vibe Coding Safe?</h1>
             <h2 class="subtitle is-3">Benchmarking Vulnerability of Agent-Generated Code in Real-World Tasks</h2>
+            <h1 style="color: grey; font-size: 1 rem; font-weight: normal; margin-bottom: 0.5rem;">Blog made by <a
+                href="https://www.linkedin.com/in/raymondjiang0917/">Raymond Jiang</a><sup>1</sup></h1>
             <div class="is-size-5 publication-authors">
-              <span class="author-block">Songwen Zhao<sup>1,2</sup>,</span>
-              <span class="author-block">Danqing Wang<sup>1</sup>,</span>
-              <span class="author-block">Kexun Zhang<sup>1</sup>,</span>
-              <span class="author-block">Jiaxuan Luo<sup>1,3</sup>,</span>
-              <span class="author-block">Zhuo Li<sup>4</sup>,</span>
-              <span class="author-block">Lei Li<sup>1</sup></span>
+              <span class="author-block"><a href="https://www.linkedin.com/in/songwen-zhao">Songwen
+                  Zhao</a><sup>1,2</sup>,</span>
+              <span class="author-block"><a href="https://dqwang122.github.io/">Danqing Wang</a><sup>1</sup>,</span>
+              <span class="author-block"><a href="https://zkx06111.github.io/">Kexun Zhang</a><sup>1</sup>,</span>
+              <span class="author-block"><a href="https://www.linkedin.com/in/jiaxuan-luo-70780a327">Jiaxuan
+                  Luo</a><sup>1,3</sup>,</span>
+              <span class="author-block"><a href="https://www.linkedin.com/in/zhuo-li-4830a145">Zhuo
+                  Li</a><sup>4</sup>,</span>
+              <span class="author-block"><a href="https://lileicc.github.io/">Lei Li</a><sup>1</sup></span>
             </div>
 
             <div class="is-size-6 publication-authors">
@@ -168,30 +173,42 @@
             </ul>
 
             <!-- INSERT IMAGE: [Figure 5 from paper: Domain coverage pie chart] -->
-            <div class="has-text-centered my-4"><img src="static/images/curation_pipeline_2-1.jpg"
-                alt="Domain Coverage"></div>
+            <div class="has-text-centered my-4"><img src="static\images\figure 2.png" alt="Domain Coverage"></div>
 
             <h3 class="title is-4 mt-4">Methodology: The "Masking" Pipeline</h3>
             <p>
               The benchmark was constructed using a novel pipeline to ensure realism:
             </p>
             <ol>
-              <li><strong>Mining</strong>: The authors identified historical pull requests that fixed security
-                vulnerabilities.</li>
-              <li><strong>Masking</strong>: They "masked" the secure implementation of the feature, reverting the
-                codebase to 2 commits prior to the fix.</li>
-              <li><strong>Task Generation</strong>: Using the <em>generic</em> feature request (without security hints),
-                they challenge agents to implement the feature.</li>
-              <li><strong>Agentic Environment Setup</strong>: Finally, they used agents to automatically generate and
-                debug
-                Docker environments for all 108 repositories (Appendix A.3), a massive engineering feat that allows
-                SusVibes to run in <em>executable</em> real-world containers.</li>
-              <li><strong>Adaptive Verification</strong>: A crucial verification loop (Figure 4) where an agent checks
-                line-by-line if the generated task description actually matches the canonical implementation. This
-                ensures the benchmark is fair and not solvable by mere guessing.
+              <li><strong>Mining</strong>: The authors collected over 20,000 open-source vulnerability-fixing commits
+                over the past 10 years from existing datasets (ReposVul and MoreFixes), filtering to ~3,000 Python
+                projects using Python ≥3.7. They further filtered to commits that modify tests, ensuring each task has
+                human-written security tests.</li>
+              <li><strong>Harnessing Tests</strong>: For each vulnerability-fixing commit C<sub>0</sub>, the changes are
+                separated into implementation changes P<sub>F</sub> and test changes P<sub>T</sub>. The added tests from
+                the fix commit become security tests T<sub>secure</sub>, while existing tests at the preceding commit
+                C<sub>−1</sub> serve as functionality tests T<sub>func</sub>.</li>
+              <li><strong>Masking</strong>: They reverted to the preceding commit C<sub>−1</sub> (the vulnerable
+                version) and used SWE-Agent to create a minimal mask M that removes the feature implementation.
+                Critically, the mask is generated on C<sub>−1</sub> (not on the fixed commit C<sub>0</sub>) to ensure no
+                information from the security fix leaks into the task.</li>
+              <li><strong>Task Description Generation</strong>: A second SWE-Agent instance generates a feature request
+                from the masked code M and the repository, written in GitHub-issue style without any security hints or
+                implementation instructions.</li>
+              <li><strong>Adaptive Verification</strong>: A crucial verification loop where a third SWE-Agent instance
+                checks line-by-line whether the generated task description covers the full canonical implementation
+                (including the security fix). If any implementation line cannot be linked to a requirement in the
+                description, the pipeline goes back to generate a larger mask. This loop repeats until the task
+                description matches the canonical implementation.
                 <div class="has-text-centered my-4 mb-5"><img src="static/images/tmp_2-1.jpg"
                     alt="Verification Pipeline"></div>
               </li>
+              <li><strong>Execution Environment</strong>: SWE-Agent was used to automatically build Docker images for
+                all 108 repositories by consulting existing container configurations, CI/CD pipelines, and
+                documentation. This massive engineering feat allows SusVibes to run in <em>executable</em> real-world
+                containers. Test validation ensures: (i) the masked commit C<sup>M</sup><sub>−1</sub> fails both
+                functional and security tests; (ii) the vulnerable commit C<sub>−1</sub> passes functional but fails
+                security tests; and (iii) the fixed commit C<sub>0</sub> passes both.</li>
             </ol>
             <p>
               This setup (visualized in Figure 2 of the paper) perfectly isolates the "Vibe Coding" behavior: the agent
@@ -286,19 +303,28 @@
           <h3 class="title is-4">3. Failed Mitigation Strategies</h3>
           <div class="content">
             <p>
-              The authors attempted several mitigation strategies, including:
+              Beyond the default generic security reminder ("Make sure to follow best security practices..."), the
+              authors investigated two additional mitigation strategies on SWE-Agent with Claude 4 Sonnet:
             </p>
             <ul>
-              <li><strong>Self-Selection</strong>: Asking the agent to identify potential risks.</li>
-              <li><strong>Oracle CWE</strong>: Explicitly telling the agent the vulnerability type.</li>
+              <li><strong>Self-Selection</strong>: A 2-phase process where the agent first identifies the most relevant
+                CWE vulnerability types from a provided list, then implements the code with those risks in mind.</li>
+              <li><strong>Oracle CWE</strong>: Providing the agent with the ground-truth CWE that the task targets and
+                explicitly asking it to avoid that vulnerability type.</li>
             </ul>
             <p>
-              Surprisingly, <strong>none of these strategies succeeded</strong>. In fact, providing security hints
-              caused a significant drop in <em>functional</em> correctness (approx. 6%), as agents became
-              <strong>"over-defensive."</strong>
-              The analysis reveals that agents obsessed over security checks to the point where they broke the actual
-              feature logic or mishandled edge cases. This negative result highlights that naive prompting is
-              insufficient for secure code generation—agents struggle to balance caution with capability.
+              Surprisingly, <strong>neither strategy improved the number of secure solutions</strong>. Self-selection
+              dropped FUNCPASS from 61.0% to 52.5% (−8.5 pp) while SECPASS fell from 10.5% to 9.5%. Even providing the
+              oracle CWE only maintained SECPASS at 10.5% while reducing FUNCPASS to 56.0% (−5.5 pp). The agents became
+              <strong>"over-defensive"</strong>—obsessing over security checks to the point where they broke the actual
+              feature logic or mishandled functional edge cases.
+            </p>
+            <p>
+              This is caused by two competing trends when giving agents extra security prompts: <strong>(1)</strong> The
+              prompts improve the agent's ability to defend against security risks, turning some previously insecure
+              solutions into secure ones; but <strong>(2)</strong> the prompts cause previously correct solutions to
+              regress to incorrect, as agents overly focus on security and omit functional edge cases. The net effect is
+              that the second trend dominates, leading to an overall performance drop.
             </p>
 
             <!-- Sliding Window Panel -->
@@ -380,14 +406,316 @@
             </div>
           </div>
 
-          <h3 class="title is-4">4. Complementary Blind Spots</h3>
+          <h3 class="title is-4">4. Complementary Blind Spots Across Models</h3>
           <div class="content">
             <p>
-              There is no "silver bullet" model. The study found that 58% of the security blind spots were unique to
-              specific models, meaning different agents are vulnerable to completely different types of bugs.
-              This means switching models doesn't guarantee safety; it merely rotates the risk surface.
+              To compare security awareness independently of coding ability, the authors define
+              <strong>SECPASS⊥FUNCPASS</strong>: the security rate on <em>only</em> the tasks all models solve
+              correctly.
+            </p>
+
+            <!-- Animated bar chart -->
+            <div class="blind-spot-bars" id="blind-spot-bars">
+              <div class="bar-row">
+                <span class="bar-label">Gemini 2.5 Pro</span>
+                <div class="bar-track">
+                  <div class="bar-fill bar-gold" data-target="55">27.6%</div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <span class="bar-label">Kimi K2</span>
+                <div class="bar-track">
+                  <div class="bar-fill bar-silver" data-target="41">20.7%</div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <span class="bar-label">Claude 4 Sonnet</span>
+                <div class="bar-track">
+                  <div class="bar-fill bar-bronze" data-target="34">17.2%</div>
+                </div>
+              </div>
+
+              <p class="is-size-7 has-text-grey has-text-centered mt-3 mb-0">Conditional security rate
+                (SECPASS⊥FUNCPASS, %)
+                — OpenHands framework</p>
+            </div>
+
+            <div class="section-takeaway">
+              <strong>58% of CWE blind spots were unique to specific models</strong> — different
+              LLMs are cautious about entirely different vulnerability types. Switching models doesn't guarantee safety;
+              it merely <strong>rotates the risk surface</strong>.
+            </div>
+          </div>
+
+          <h3 class="title is-4">5. Same CWE, Different Outcomes</h3>
+          <div class="content">
+            <p>
+              Even within the same CWE, security outcomes differ wildly across repositories.
+              Toggle between models to compare:
+            </p>
+
+            <!-- Interactive toggle -->
+            <div class="heatmap-toggle" id="heatmap-toggle">
+              <button class="active" data-model="claude" onclick="switchHeatmap('claude')">Claude 4 Sonnet</button>
+              <button data-model="gemini" onclick="switchHeatmap('gemini')">Gemini 2.5 Pro</button>
+            </div>
+
+            <!-- Heatmap grid -->
+            <div class="heatmap-grid" id="heatmap-grid">
+              <!-- Populated by JS -->
+            </div>
+
+            <p class="is-size-7 has-text-grey has-text-centered mt-0 mb-2">Security rate
+              (SECPASS⊥FUNCPASS, %) per
+              repository — SWE-Agent</p>
+
+            <div class="section-takeaway">
+              Claude 4 Sonnet achieves 58.8% functionality on Django but <strong>0% conditional security</strong>, while
+              Gemini manages <strong>100% security</strong> despite lower functionality. Coding ability and security
+              awareness are independent capabilities.
+            </div>
+          </div>
+
+          <h3 class="title is-4">6. Can Smarter Models Close the Gap?</h3>
+          <div class="content">
+            <p>
+              Gemini 3 Pro dramatically improves functional correctness over 2.5 Pro.
+              But does more intelligence mean more security?
+            </p>
+
+            <!-- Comparison bars -->
+            <div class="comparison-group" id="comparison-bars">
+              <div class="comparison-row">
+                <div class="comparison-label">SWE-Agent</div>
+                <div class="comparison-bars">
+                  <div class="comparison-bar-wrap">
+                    <span class="comparison-bar-tag func-tag">FUNC</span>
+                    <div class="comparison-bar-track">
+                      <div class="comparison-bar-fill func-bar" data-target="69">+95%</div>
+                    </div>
+                  </div>
+                  <div class="comparison-bar-wrap">
+                    <span class="comparison-bar-tag sec-tag">SEC</span>
+                    <div class="comparison-bar-track">
+                      <div class="comparison-bar-fill sec-bar" data-target="41">+57%</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="comparison-delta positive">↑ 95%<br><span class="tiny">↑ 57%</span></div>
+              </div>
+              <div class="comparison-row">
+                <div class="comparison-label">OpenHands</div>
+                <div class="comparison-bars">
+                  <div class="comparison-bar-wrap">
+                    <span class="comparison-bar-tag func-tag">FUNC</span>
+                    <div class="comparison-bar-track">
+                      <div class="comparison-bar-fill func-bar" data-target="97">+149%</div>
+                    </div>
+                  </div>
+                  <div class="comparison-bar-wrap">
+                    <span class="comparison-bar-tag sec-tag">SEC</span>
+                    <div class="comparison-bar-track">
+                      <div class="comparison-bar-fill sec-bar" data-target="5">+6%</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="comparison-delta positive">↑ 149%<br><span class="tiny">↑ 6%</span></div>
+              </div>
+              <div class="comparison-row">
+                <div class="comparison-label">Claude Code</div>
+                <div class="comparison-bars">
+                  <div class="comparison-bar-wrap">
+                    <span class="comparison-bar-tag func-tag">FUNC</span>
+                    <div class="comparison-bar-track">
+                      <div class="comparison-bar-fill func-bar" data-target="86">+130%</div>
+                    </div>
+                  </div>
+                  <div class="comparison-bar-wrap">
+                    <span class="comparison-bar-tag sec-tag">SEC</span>
+                    <div class="comparison-bar-track">
+                      <div class="comparison-bar-fill sec-bar-flat" data-target="2">±0%</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="comparison-delta flat">↑ 130%<br><span class="flat">±0%</span></div>
+              </div>
+            </div>
+
+            <p class="is-size-7 has-text-grey has-text-centered mt-0 mb-2">Relative improvement from Gemini 2.5 Pro → 3
+              Pro. Bar width represents relative change magnitude.</p>
+
+            <div class="section-takeaway">
+              Functionality improves by <strong>up to +149%</strong>, but security gains are
+              <strong>negligible or zero</strong>. More intelligence alone is not sufficient for secure code.
+            </div>
+          </div>
+
+          <h3 class="title is-4">7. CWE Identification: Can Agents Even Recognize the Risk?</h3>
+          <div class="content">
+            <p>
+              In the self-selection setting, agents were asked to identify relevant CWEs before coding. On average,
+              agents selected <strong>7.5 CWEs</strong> per task — against a ground truth of just
+              <strong>1.06</strong>. This means agents cast a very wide net, tagging many vulnerability types
+              in the hope of covering the right one.
+            </p>
+
+            <!-- Stat counters -->
+            <div class="stat-counters" id="stat-counters">
+              <div class="stat-counter-card">
+                <div class="stat-counter-number" data-target="7.5" data-decimals="1">0</div>
+                <div class="stat-counter-label">CWEs selected<br>(per task, avg)</div>
+              </div>
+              <div class="stat-counter-card">
+                <div class="stat-counter-number" data-target="1.06" data-decimals="2"
+                  style="color: var(--primary-color)">0</div>
+                <div class="stat-counter-label">Actual CWEs<br>(ground truth)</div>
+              </div>
+            </div>
+
+            <p>
+              But does this shotgun approach work? The paper measures <strong>precision</strong> (what fraction of
+              selected CWEs were actually correct) and <strong>recall</strong> (whether the true CWE was among those
+              selected) for solutions that were both functionally correct and secure:
+            </p>
+
+            <!-- Progress rings -->
+            <div class="progress-rings" id="progress-rings">
+              <div class="progress-ring-card">
+                <svg class="progress-ring-svg" viewBox="0 0 120 120">
+                  <circle class="progress-ring-bg" cx="60" cy="60" r="50" />
+                  <circle class="progress-ring-fill ring-red" cx="60" cy="60" r="50" stroke-dasharray="314.16"
+                    stroke-dashoffset="314.16" data-target="10" />
+                  <text class="progress-ring-value" x="60" y="65" text-anchor="middle"
+                    transform="rotate(90 60 60)">~10%</text>
+                </svg>
+                <div class="progress-ring-label"><strong>Precision</strong></div>
+                <div class="progress-ring-label" style="font-size:0.7rem;margin-top:0.1rem">Only ~1 in 10 selected
+                  CWEs<br>was actually relevant</div>
+              </div>
+              <div class="progress-ring-card">
+                <svg class="progress-ring-svg" viewBox="0 0 120 120">
+                  <circle class="progress-ring-bg" cx="60" cy="60" r="50" />
+                  <circle class="progress-ring-fill ring-green" cx="60" cy="60" r="50" stroke-dasharray="314.16"
+                    stroke-dashoffset="314.16" data-target="73.7" />
+                  <text class="progress-ring-value" x="60" y="65" text-anchor="middle"
+                    transform="rotate(90 60 60)">73.7%</text>
+                </svg>
+                <div class="progress-ring-label"><strong>Recall</strong></div>
+                <div class="progress-ring-label" style="font-size:0.7rem;margin-top:0.1rem">The true CWE was found<br>~3
+                  out of 4 times</div>
+              </div>
+            </div>
+
+            <p>
+              There is a clear signal: solutions that end up being secure have significantly higher recall
+              (0.737 vs 0.609 for insecure solutions), suggesting that correctly identifying the right CWE does help
+              produce secure code. However, even the best recall is only 73.7% — meaning agents still miss the
+              target CWE <strong>over a quarter of the time</strong>, even after selecting 7× more
+              CWEs than necessary.
+            </p>
+
+            <div class="section-takeaway">
+              Agents <strong>hedge by selecting many CWEs</strong>, most irrelevant (~10% precision).
+              Even then, they still miss the target CWE over a quarter of the time. Current coding agents have
+              <strong>fundamental difficulty identifying security risks</strong> from task descriptions alone.
+            </div>
+          </div>
+
+          <h3 class="title is-4">8. Security vs. Functionality: A Deeper Tension</h3>
+          <div class="content">
+            <p>
+              In agent-powered software engineering, agents make high-level decisions about what to do (finding context
+              files, checking bugs, reviewing feedback) before implementing code. These high-level decisions function as
+              an "outline" that increases the agent's freedom and sensitivity. This may explain why it is so difficult
+              to balance security and functionality, especially in tasks that highly require both.
+            </p>
+
+            <p>
+              As a concrete example, SWE-Agent was given the same Wagtail inspection task twice — once normally,
+              and once with explicit security instructions:
+            </p>
+
+            <!-- Improved step counter with segmented bars -->
+            <div class="step-counter-demo" id="step-counter-demo">
+              <div class="step-counter-row success-row">
+                <div class="step-icon">🛡️</div>
+                <div class="step-details">
+                  <div class="step-details-label">Without security prompts</div>
+                  <div class="step-details-bar" style="display:flex">
+                    <div class="step-details-fill fill-green" data-target="100"
+                      style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;">
+                      81 steps on functionality
+                    </div>
+                  </div>
+                  <div class="step-details-sub">
+                    <span>Total: 81 steps</span>
+                    <span>Correctly & securely resolved</span>
+                  </div>
+                </div>
+                <div class="step-result result-pass">✅ Passed</div>
+              </div>
+              <div class="step-counter-row fail-row">
+                <div class="step-icon">⚠️</div>
+                <div class="step-details">
+                  <div class="step-details-label">With security prompts</div>
+                  <div class="step-details-bar" style="display:flex">
+                    <div class="step-details-fill fill-red" data-target="89"
+                      style="display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;border-radius:4px 0 0 4px;">
+                      72 steps on functionality
+                    </div>
+                    <div
+                      style="width:0%;height:100%;background:linear-gradient(90deg,#fbbf24,#d97706);border-radius:0 4px 4px 0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff;transition:width 1.5s cubic-bezier(0.22,1,0.36,1);"
+                      class="step-sec-fill" data-target="5">
+                      4
+                    </div>
+                  </div>
+                  <div class="step-details-sub">
+                    <span>Total: 76 steps (72 func + 4 security)</span>
+                    <span>Failed functionality</span>
+                  </div>
+                </div>
+                <div class="step-result result-fail">❌ Failed</div>
+              </div>
+            </div>
+
+            <p>
+              The agent spent <strong>4 steps on explicit security testing</strong> but only 72 on functionality —
+              9 fewer than it needed. The result: the agent <em>failed</em> the task entirely. The more specific the
+              security prompts, the larger the performance drops. This suggests that security
+              awareness cannot simply be "bolted on" to existing agents via prompting.
+            </p>
+
+            <div class="section-takeaway">
+              Security awareness <strong>cannot be bolted on</strong> via prompting — it must be treated as a
+              <strong>first-class training objective</strong>.
+            </div>
+          </div>
+
+          <h3 class="title is-4">9. Conclusion</h3>
+          <div class="content">
+            <p>
+              SusVibes reveals a persistent and disturbing gap in AI-powered software development: <strong>agents
+                frequently achieve functional correctness yet systematically fail security checks on the same
+                tasks</strong>. The best-performing combination (SWE-Agent + Claude 4 Sonnet) achieves 61% functionality
+              but leaves over 80% of working code insecure.
+            </p>
+            <p>
+              Simple mitigation attempts — including security prompting, CWE self-identification, or even providing the
+              oracle CWE hints — do not reliably close this gap. These strategies trigger a counter-productive
+              trade-off:
+              improvements in security recognition are overwhelmed by regressions in functional correctness. Even
+              next-generation models like Gemini 3 Pro, despite massive functional improvements, show negligible
+              security gains.
+            </p>
+            <p>
+              The finding that 80%+ of functionally correct agent-generated code contains exploitable vulnerabilities
+              has profound implications for organizations deploying coding agents in security-sensitive domains
+              including authentication, data handling, and infrastructure. These results caution against the casual
+              adoption of vibe coding and argue that <strong>security must be treated as a first-class
+                objective</strong> — not an afterthought — for general-purpose coding agents.
             </p>
           </div>
+
         </div>
       </div>
 
@@ -533,7 +861,7 @@
               <div class="session-event" id="session-evt-4">
                 <div class="session-time">Day 90</div>
                 <div class="session-dot session-dot-red"></div>
-                <div class="session-desc">Attacker replays cookie &rarr; <strong>full session restored</strong></div>
+                <div class="session-desc">Attacker replays cookie &rarr; full session restored</div>
               </div>
             </div>
             <div class="session-verdict">
@@ -666,19 +994,107 @@
 
       goTo(0);
     })();
+
+    /* ── Section 5: Heatmap Toggle ── */
+    const heatmapData = {
+      claude: [
+        { repo: 'airflow', sec: 50.0, cls: 'secure-mid' },
+        { repo: 'py-libnmap', sec: 100.0, cls: 'secure-perfect' },
+        { repo: 'wagtail', sec: 25.0, cls: 'secure-low' },
+        { repo: 'django', sec: 0.0, cls: 'secure-none' }
+      ],
+      gemini: [
+        { repo: 'airflow', sec: 66.7, cls: 'secure-high' },
+        { repo: 'py-libnmap', sec: 0.0, cls: 'secure-none' },
+        { repo: 'wagtail', sec: 66.7, cls: 'secure-high' },
+        { repo: 'django', sec: 100.0, cls: 'secure-perfect' }
+      ]
+    };
+
+    function switchHeatmap(model) {
+      const grid = document.getElementById('heatmap-grid');
+      const btns = document.querySelectorAll('#heatmap-toggle button');
+      btns.forEach(b => b.classList.toggle('active', b.dataset.model === model));
+
+      grid.innerHTML = heatmapData[model].map(d => `
+        <div class="heatmap-cell ${d.cls}">
+          <div class="heatmap-cell-label">${d.repo}</div>
+          <div class="heatmap-cell-value">${d.sec}%</div>
+          <div class="heatmap-cell-sub">SEC⊥FUNC</div>
+        </div>
+      `).join('');
+    }
+    switchHeatmap('claude');
+
+    /* ── Scroll-triggered Animations ── */
+    function animateOnScroll(selector, callback) {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            callback(el);
+            observer.unobserve(el);
+          }
+        });
+      }, { threshold: 0.3 });
+      observer.observe(el);
+    }
+
+    // Section 4: bar fills
+    animateOnScroll('#blind-spot-bars', (el) => {
+      el.querySelectorAll('.bar-fill').forEach(bar => {
+        bar.style.width = bar.dataset.target + '%';
+      });
+    });
+
+    // Section 6: comparison bars
+    animateOnScroll('#comparison-bars', (el) => {
+      el.querySelectorAll('.comparison-bar-fill').forEach(bar => {
+        bar.style.width = bar.dataset.target + '%';
+      });
+    });
+
+    // Section 7: stat counters
+    animateOnScroll('#stat-counters', (el) => {
+      el.querySelectorAll('.stat-counter-number').forEach(counter => {
+        const target = parseFloat(counter.dataset.target);
+        const decimals = parseInt(counter.dataset.decimals) || 0;
+        const duration = 1500;
+        const start = performance.now();
+        function tick(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          counter.textContent = (target * eased).toFixed(decimals);
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    });
+
+    // Section 7: progress rings
+    animateOnScroll('#progress-rings', (el) => {
+      el.querySelectorAll('.progress-ring-fill').forEach(ring => {
+        const circumference = 314.16;
+        const pct = parseFloat(ring.dataset.target) / 100;
+        ring.style.strokeDashoffset = circumference * (1 - pct);
+      });
+    });
+
+    // Section 8: step counter bars
+    animateOnScroll('#step-counter-demo', (el) => {
+      el.querySelectorAll('.step-details-fill').forEach(bar => {
+        bar.style.width = bar.dataset.target + '%';
+      });
+      el.querySelectorAll('.step-sec-fill').forEach(bar => {
+        bar.style.width = bar.dataset.target + '%';
+      });
+    });
   </script>
 
 
   <footer class="footer">
     <div class="container">
-      <div class="content has-text-centered">
-        <a class="icon-link" href="https://arxiv.org/pdf/2512.03262">
-          <i class="fas fa-file-pdf"></i>
-        </a>
-        <a class="icon-link" href="https://github.com/OSU-NLP-Group/SusVibes">
-          <i class="fab fa-github"></i>
-        </a>
-      </div>
       <div class="content has-text-centered">
         <p>
           This website is based on the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> template.
